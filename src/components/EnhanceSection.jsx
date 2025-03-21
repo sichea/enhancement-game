@@ -1,4 +1,4 @@
-// src/components/EnhanceSection.jsx - 강화 섹션 컴포넌트
+// src/components/EnhanceSection.jsx
 import React from 'react';
 
 const EnhanceSection = ({ 
@@ -6,9 +6,10 @@ const EnhanceSection = ({
   successRate, 
   sellPrice,
   swordLevel,
+  enhancing,
   onEnhance, 
   onSell, 
-  onQuestClick 
+  onCollectionClick 
 }) => {
   return (
     <div className="enhancement-section">
@@ -32,24 +33,32 @@ const EnhanceSection = ({
       <button 
         className="enhance-button"
         onClick={onEnhance}
+        disabled={swordLevel >= 10 || enhancing}
+        title={swordLevel >= 10 ? "최대 레벨에 도달했습니다" : enhancing ? "강화 중..." : "강화하기"}
       >
-        강화하기
+        {enhancing ? "강화 중..." : "강화하기"}
       </button>
       
       <div className="actions">
         <button 
           className="action-button"
           onClick={onSell}
-          disabled={swordLevel === 0}
-          title={swordLevel === 0 ? "판매할 검이 없습니다" : `${sellPrice} 골드에 판매하기`}
+          disabled={swordLevel === 0 || enhancing}
+          title={
+            enhancing ? "강화 중에는 판매할 수 없습니다" : 
+            swordLevel === 0 ? "판매할 검이 없습니다" : 
+            `${sellPrice} 골드에 판매하기`
+          }
         >
           검 판매하기
         </button>
         <button 
           className="action-button"
-          onClick={onQuestClick}
+          onClick={onCollectionClick}
+          disabled={enhancing}
+          title={enhancing ? "강화 중에는 컬렉션을 볼 수 없습니다" : "지금까지 수집한 검 보기"}
         >
-          퀘스트 가기
+          검 컬렉션
         </button>
       </div>
     </div>

@@ -1,10 +1,10 @@
-// src/App.js - 메인 앱 컴포넌트
+// src/App.js
 import React, { useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
 import SwordDisplay from './components/SwordDisplay';
 import EnhanceSection from './components/EnhanceSection';
-import QuestModal from './components/QuestModal';
+import SwordCollection from './components/SwordCollection';
 import Notification from './components/Notification';
 import useGameState from './hooks/useGameState';
 import { initTelegramWebApp } from './utils/telegramUtils';
@@ -14,12 +14,11 @@ function App() {
     gameState,
     enhanceSword,
     sellSword,
-    completeQuest,
-    showQuestModal,
-    hideQuestModal,
+    showCollectionModal,
+    hideCollectionModal,
     notification,
     hideNotification,
-    questModalVisible,
+    collectionModalVisible,
     currentSellPrice
   } = useGameState();
 
@@ -38,6 +37,7 @@ function App() {
         swordPower={gameState.swordPower}
         swordImage={gameState.swordImage}
         enhancing={gameState.enhancing}
+        lastEnhanceSuccess={gameState.lastEnhanceSuccess}
       />
       
       <EnhanceSection 
@@ -45,9 +45,10 @@ function App() {
         successRate={gameState.successRate}
         sellPrice={currentSellPrice}
         swordLevel={gameState.swordLevel}
+        enhancing={gameState.enhancing}
         onEnhance={enhanceSword}
         onSell={sellSword}
-        onQuestClick={showQuestModal}
+        onCollectionClick={showCollectionModal}
       />
       
       {gameState.resultMessage && (
@@ -56,12 +57,10 @@ function App() {
         </div>
       )}
       
-      {questModalVisible && (
-        <QuestModal 
-          quests={Array.isArray(gameState.quests) ? gameState.quests : []}
-          playerLevel={gameState.playerLevel}
-          onComplete={completeQuest}
-          onClose={hideQuestModal}
+      {collectionModalVisible && (
+        <SwordCollection 
+          collectedSwords={gameState.collectedSwords}
+          onClose={hideCollectionModal}
         />
       )}
       
