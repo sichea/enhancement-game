@@ -4,7 +4,7 @@ const setsData = [
     id: 1,
     name: "전설의 영웅 세트",
     description: "고대의 영웅이 사용했던 전설적인 세트입니다. 엄청난 힘을 발휘합니다.",
-    requiredSwords: [2, 3],  // 필요한 검 레벨
+    requiredSwords: [1, 2, 3],  // 필요한 검 레벨
     resultSword: {
       name: "전설의 영웅 검",
       power: 500,

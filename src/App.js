@@ -5,6 +5,7 @@ import Header from './components/Header';
 import SwordDisplay from './components/SwordDisplay';
 import EnhanceSection from './components/EnhanceSection';
 import SwordCollection from './components/SwordCollection';
+import SwordSetFusion from './components/SwordSetFusion';
 import Notification from './components/Notification';
 import useGameState from './hooks/useGameState';
 import { initTelegramWebApp } from './utils/telegramUtils';
@@ -19,7 +20,13 @@ function App() {
     notification,
     hideNotification,
     collectionModalVisible,
-    currentSellPrice
+    currentSellPrice,
+    // 세트 합성 관련 상태와 함수
+    fusionModalVisible,
+    showFusionModal,
+    hideFusionModal,
+    fuseSwords,
+    setsData
   } = useGameState();
 
   // 텔레그램 웹앱 초기화
@@ -49,6 +56,7 @@ function App() {
         onEnhance={enhanceSword}
         onSell={sellSword}
         onCollectionClick={showCollectionModal}
+        onFusionClick={showFusionModal} // 합성 버튼 클릭 핸들러 추가
       />
       
       {gameState.resultMessage && (
@@ -61,6 +69,16 @@ function App() {
         <SwordCollection 
           collectedSwords={gameState.collectedSwords}
           onClose={hideCollectionModal}
+        />
+      )}
+      
+      {fusionModalVisible && (
+        <SwordSetFusion
+          collectedSwords={gameState.collectedSwords}
+          setsData={setsData}
+          onFuse={fuseSwords}
+          onClose={hideFusionModal}
+          playerGold={gameState.gold}
         />
       )}
       

@@ -9,7 +9,8 @@ const EnhanceSection = ({
   enhancing,
   onEnhance, 
   onSell, 
-  onCollectionClick 
+  onCollectionClick,
+  onFusionClick  // 합성 버튼 핸들러 추가
 }) => {
   return (
     <div className="enhancement-section">
@@ -59,6 +60,14 @@ const EnhanceSection = ({
           title={enhancing ? "강화 중에는 컬렉션을 볼 수 없습니다" : "지금까지 수집한 검 보기"}
         >
           검 컬렉션
+        </button>
+        <button 
+          className="action-button"
+          onClick={onFusionClick}
+          disabled={enhancing}
+          title={enhancing ? "강화 중에는 합성할 수 없습니다" : "검 세트 합성하기"}
+        >
+          검 세트 합성
         </button>
       </div>
     </div>

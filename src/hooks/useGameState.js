@@ -130,73 +130,76 @@ const useGameState = () => {
   ]);
 
   // 검 강화 함수
-  // 검 강화 함수를 수정
-const enhanceSword = useCallback(() => {
-  setGameState(prevState => {
+  const enhanceSword = useCallback(() => {
+    // 현재 상태를 가져와서 강화 가능 여부 먼저 확인
+    const currentState = { ...gameState };
+    
     // 이미 강화 중이면 중복 실행 방지
-    if (prevState.enhancing) {
-      return prevState;
+    if (currentState.enhancing) {
+      return;
     }
     
     // 골드가 부족하면 강화 불가
-    if (prevState.gold < prevState.enhancementCost) {
+    if (currentState.gold < currentState.enhancementCost) {
       showNotificationMessage('골드가 부족합니다!');
-      return prevState;
+      return;
     }
     
     // 최대 레벨 검사
-    if (prevState.swordLevel >= 10) {
+    if (currentState.swordLevel >= 10) {
       showNotificationMessage('이미 최대 레벨에 도달했습니다!');
-      return prevState;
+      return;
     }
-
+  
     // 강화할 검의 레벨 (현재 레벨)
-    const currentLevel = prevState.swordLevel;
+    const currentLevel = currentState.swordLevel;
     
-    // 골드 차감 및 강화 애니메이션 시작
-    const newState = {
+    // 강화 비용 차감 및 애니메이션 시작 상태 설정
+    setGameState(prevState => ({
       ...prevState,
       gold: prevState.gold - prevState.enhancementCost,
       enhancing: true,
       resultMessage: null
-    };
-
+    }));
+  
     // 애니메이션 타이밍에 맞춰 결과 처리를 위한 타이머 설정
     setTimeout(() => {
-      const success = Math.random() * 100 < prevState.successRate;
+      // 강화 성공 확률 계산 (현재 설정된 확률 사용)
+      const success = Math.random() * 100 < currentState.successRate;
       
-      if (success) {
-        // 강화 성공 - 다음 레벨로 진행
-        const newSwordLevel = currentLevel + 1;
-        const newSword = swordData.find(sword => sword.level === newSwordLevel);
-        
-        // 강화 성공한 검을 컬렉션에 추가 (이미 있는 경우 제외)
-        setGameState(currentState => {
-          const today = new Date().toLocaleDateString();
+      // 성공 또는 실패에 따른 상태 업데이트를 한 번에 처리
+      setGameState(prevState => {
+        // 결과에 따라 새로운 상태 계산
+        if (success) {
+          // 강화 성공
+          const newSwordLevel = currentLevel + 1;
+          const newSword = swordData.find(sword => sword.level === newSwordLevel);
           
-          // 컬렉션에 이미 있는지 확인
-          const alreadyCollected = currentState.collectedSwords.some(
+          // 현재 컬렉션을 복사
+          let updatedCollection = [...prevState.collectedSwords];
+          
+          // 이미 컬렉션에 있는지 확인
+          const alreadyCollected = updatedCollection.some(
             sword => sword.level === newSwordLevel
           );
           
-          let updatedCollection = [...currentState.collectedSwords];
-          
           // 아직 컬렉션에 없는 경우에만 추가
           if (!alreadyCollected && newSword) {
+            const today = new Date().toLocaleDateString();
             const collectedSword = {
               ...newSword,
               obtainedDate: today
             };
-            
-            updatedCollection = [...updatedCollection, collectedSword];
+            updatedCollection.push(collectedSword);
           }
           
+          // 성공한 경우의 새 상태 반환
           return {
-            ...currentState,
+            ...prevState,
             swordLevel: newSwordLevel,
-            swordName: newSword?.name || currentState.swordName,
-            swordPower: newSword?.power || currentState.swordPower,
-            swordImage: newSword?.imageSrc || currentState.swordImage,
+            swordName: newSword?.name || prevState.swordName,
+            swordPower: newSword?.power || prevState.swordPower,
+            swordImage: newSword?.imageSrc || prevState.swordImage,
             playerLevel: Math.floor(newSwordLevel / 2) + 1,
             enhancementCost: Math.floor(100 * Math.pow(1.5, newSwordLevel)),
             successRate: Math.max(5, 90 - (newSwordLevel * 7)),
@@ -205,31 +208,29 @@ const enhanceSword = useCallback(() => {
             resultMessage: '강화 성공!',
             lastEnhanceSuccess: true
           };
-        });
-      } else {
-        // 강화 실패 - 레벨을 0으로 완전 초기화
-        const newSwordLevel = 0;
-        const newSword = swordData.find(sword => sword.level === newSwordLevel);
-        
-        setGameState(currentState => ({
-          ...currentState,
-          swordLevel: newSwordLevel,
-          swordName: newSword?.name || currentState.swordName,
-          swordPower: newSword?.power || currentState.swordPower,
-          swordImage: newSword?.imageSrc || currentState.swordImage,
-          playerLevel: Math.floor(newSwordLevel / 2) + 1,
-          enhancementCost: Math.floor(100 * Math.pow(1.5, newSwordLevel)),
-          successRate: Math.max(5, 90 - (newSwordLevel * 7)),
-          enhancing: false,
-          resultMessage: '강화 실패!',
-          lastEnhanceSuccess: false
-         }));
-       }
-     }, 1000);
-
-     return newState;
-   });
- }, [showNotificationMessage]);
+        } else {
+          // 강화 실패
+          const newSwordLevel = 0;
+          const newSword = swordData.find(sword => sword.level === newSwordLevel);
+          
+          // 실패한 경우의 새 상태 반환 (컬렉션은 그대로 유지)
+          return {
+            ...prevState,
+            swordLevel: newSwordLevel,
+            swordName: newSword?.name || prevState.swordName,
+            swordPower: newSword?.power || prevState.swordPower,
+            swordImage: newSword?.imageSrc || prevState.swordImage,
+            playerLevel: Math.floor(newSwordLevel / 2) + 1,
+            enhancementCost: Math.floor(100 * Math.pow(1.5, newSwordLevel)),
+            successRate: Math.max(5, 90 - (newSwordLevel * 7)),
+            enhancing: false,
+            resultMessage: '강화 실패!',
+            lastEnhanceSuccess: false
+          };
+        }
+      });
+    }, 1000);
+  }, [gameState, showNotificationMessage]);
 
   // 검 판매 함수
   const sellSword = useCallback(() => {
