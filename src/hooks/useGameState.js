@@ -3,28 +3,33 @@ import { useState, useEffect, useCallback } from 'react';
 import swordData from '../data/swordData';
 import setsData from '../data/setsData';
 
-const useGameState = () => {
-  // 기본 게임 상태
-  const [gameState, setGameState] = useState({
-    gold: 1000,
-    playerLevel: 1,
-    swordLevel: 0,
-    swordPower: 10,
-    swordName: '초보자의 검',
-    swordImage: 'images/sword_0.png',
-    enhancementCost: 100,
-    successRate: 90,
-    collectedSwords: [], // 수집한 검 배열
-    resultMessage: null,
-    lastEnhanceSuccess: false,
-    enhancing: false
-  });
+// 초기 기본값 상수로 정의 (모든 환경에서 동일하게 사용됨)
+const DEFAULT_GAME_STATE = {
+  gold: 1000,
+  playerLevel: 1,
+  swordLevel: 0,
+  swordPower: 10,
+  swordName: '낡은 글라디우스',
+  swordImage: 'images/sword_0.png',
+  enhancementCost: 100,
+  successRate: 90,
+  collectedSwords: [],
+  resultMessage: null,
+  lastEnhanceSuccess: false,
+  enhancing: false
+};
 
+const useGameState = () => {
+  // 기본값으로 초기화
+  const [gameState, setGameState] = useState(DEFAULT_GAME_STATE);
+  
   // UI 상태
   const [collectionModalVisible, setCollectionModalVisible] = useState(false);
   const [fusionModalVisible, setFusionModalVisible] = useState(false);
   const [notification, setNotification] = useState(null);
   const [lastFusedSword, setLastFusedSword] = useState(null);
+  // 초기화 완료 플래그
+  const [initCompleted, setInitCompleted] = useState(false);
 
   // 알림 표시 함수
   const showNotificationMessage = useCallback((message) => {
@@ -54,16 +59,21 @@ const useGameState = () => {
   const applyGameState = useCallback((savedState) => {
     if (savedState) {
       setGameState(prevState => ({
-        ...prevState,
-        ...savedState,
-        // 일부 계산된 값은 다시 계산
+        ...DEFAULT_GAME_STATE, // 항상 기본값으로 시작
+        ...savedState, // 저장된 값으로 덮어쓰기
+        // 계산된 값은 다시 계산
         enhancementCost: Math.floor(100 * Math.pow(1.5, savedState.swordLevel)),
         successRate: Math.max(5, 90 - (savedState.swordLevel * 7)),
       }));
+    } else {
+      // 저장된 상태가 없으면 기본값 사용
+      setGameState(DEFAULT_GAME_STATE);
     }
+    // 초기화 완료 표시
+    setInitCompleted(true);
   }, []);
 
-  // 게임 상태 초기화 (로컬스토리지 또는 텔레그램 클라우드 스토리지에서 로드)
+  // 게임 상태 초기화
   useEffect(() => {
     const loadGameState = async () => {
       let savedState = null;
@@ -74,20 +84,35 @@ const useGameState = () => {
           // 텔레그램 클라우드 스토리지에서 로드
           window.Telegram.WebApp.CloudStorage.getItem('swordGameState', (error, value) => {
             if (!error && value) {
-              savedState = JSON.parse(value);
-              applyGameState(savedState);
+              try {
+                savedState = JSON.parse(value);
+                applyGameState(savedState);
+              } catch (parseError) {
+                console.error('텔레그램 데이터 파싱 에러:', parseError);
+                applyGameState(null); // 파싱 에러 시 기본값 사용
+              }
+            } else {
+              // 저장된 데이터가 없으면 기본값 사용
+              applyGameState(null);
             }
           });
         } catch (e) {
           console.error('텔레그램 스토리지 로드 에러:', e);
+          applyGameState(null); // 에러 시 기본값 사용
         }
       } else {
         // 로컬스토리지에서 로드 (개발 및 테스트용)
-        const storedState = localStorage.getItem('swordGameState');
-        if (storedState) {
-          savedState = JSON.parse(storedState);
-          applyGameState(savedState);
+        try {
+          const storedState = localStorage.getItem('swordGameState');
+          if (storedState) {
+            savedState = JSON.parse(storedState);
+          }
+        } catch (e) {
+          console.error('로컬스토리지 로드 에러:', e);
         }
+        
+        // 저장된 상태 적용 또는 기본값 사용
+        applyGameState(savedState);
       }
     };
 
@@ -96,6 +121,9 @@ const useGameState = () => {
 
   // 게임 상태 저장 함수
   const saveGameState = useCallback(() => {
+    // 초기화가 완료된 후에만 저장
+    if (!initCompleted) return;
+    
     const stateToSave = {
       gold: gameState.gold,
       playerLevel: gameState.playerLevel,
@@ -113,9 +141,13 @@ const useGameState = () => {
       );
     } else {
       // 로컬스토리지에 저장 (개발 및 테스트용)
-      localStorage.setItem('swordGameState', JSON.stringify(stateToSave));
+      try {
+        localStorage.setItem('swordGameState', JSON.stringify(stateToSave));
+      } catch (e) {
+        console.error('로컬스토리지 저장 에러:', e);
+      }
     }
-  }, [gameState]);
+  }, [gameState, initCompleted]);
 
   // 게임 상태가 변경될 때마다 저장
   useEffect(() => {
@@ -255,7 +287,7 @@ const useGameState = () => {
         ...prevState,
         gold: prevState.gold + sellPrice,
         swordLevel: 0,
-        swordName: initialSword?.name || '초보자의 검',
+        swordName: initialSword?.name || '낡은 글라디우스',
         swordPower: initialSword?.power || 10,
         swordImage: initialSword?.imageSrc || 'images/sword_0.png',
         playerLevel: 1, // 플레이어 레벨 초기화
@@ -312,6 +344,21 @@ const useGameState = () => {
     hideFusionModal();
   }, [showNotificationMessage, hideFusionModal]);
 
+  // 게임 상태 초기화 함수 (새 함수 추가)
+  const resetGameState = useCallback(() => {
+    // 상태를 기본값으로 리셋
+    setGameState(DEFAULT_GAME_STATE);
+    
+    // 저장소도 지우기
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.CloudStorage.removeItem('swordGameState');
+    } else {
+      localStorage.removeItem('swordGameState');
+    }
+    
+    showNotificationMessage('게임이 초기화되었습니다.');
+  }, [showNotificationMessage]);
+
   // 현재 검의 판매 가격 계산
   const currentSellPrice = gameState.swordLevel > 0 ? calculateSellPrice(gameState.swordPower) : 0;
 
@@ -331,7 +378,9 @@ const useGameState = () => {
     hideFusionModal,
     fuseSwords,
     setsData,
-    lastFusedSword
+    lastFusedSword,
+    // 상태 초기화 함수 추가
+    resetGameState
   };
 };
 
