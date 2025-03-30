@@ -11,6 +11,8 @@ import useGameState from './hooks/useGameState';
 import { initTelegramWebApp } from './utils/telegramUtils';
 
 function App() {
+  const [screenFlash, setScreenFlash] = React.useState(false);
+  
   const {
     gameState,
     enhanceSword,
@@ -33,9 +35,25 @@ function App() {
   useEffect(() => {
     initTelegramWebApp();
   }, []);
+  
+  // 강화 실패 감지 및 화면 효과 추가
+  useEffect(() => {
+    if (gameState.lastEnhanceSuccess === false && !gameState.enhancing) {
+      // 강화 실패 시 화면 플래시 효과
+      setScreenFlash(true);
+      
+      // 일정 시간 후 효과 제거
+      setTimeout(() => {
+        setScreenFlash(false);
+      }, 500);
+    }
+  }, [gameState.lastEnhanceSuccess, gameState.enhancing]);
 
   return (
     <div className="game-container">
+      {/* 화면 플래시 효과 */}
+      {screenFlash && <div className="screen-flash"></div>}
+      
       <Header gold={gameState.gold} playerLevel={gameState.playerLevel} />
       
       <SwordDisplay 

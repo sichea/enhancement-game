@@ -251,7 +251,49 @@ const calculateSellPrice = useCallback((swordPower, swordLevel = 0) => {
           // 강화 실패
           const newSwordLevel = 0;
           const newSword = swordData.find(sword => sword.level === newSwordLevel);
-          
+
+          // 실패 메시지를 레벨에 따라 좀 더 다양하게 설정
+          let failureMessage = '강화 실패!';
+
+          // 높은 레벨일수록 더 좌절스러운 메시지
+          if (currentLevel >= 7) {
+            const messages = [
+              '강화 대실패! 검이 산산조각 났습니다!',
+              '엄청난 실패! 모든 성과가 물거품이 되었습니다!',
+              '처참한 실패! 당신의 노력은 모두 무너졌습니다!'
+            ];
+            failureMessage = messages[Math.floor(Math.random() * messages.length)];
+          } else if (currentLevel >= 4) {
+            const messages = [
+              '강화 실패! 검이 산산조각 났습니다!',
+              '실패! 그간의 노력이 물거품이 되었습니다!',
+              '어이쿠! 검이 파괴되었습니다!'
+            ];
+            failureMessage = messages[Math.floor(Math.random() * messages.length)];
+          } else if (currentLevel >= 1) {
+            const messages = [
+              '강화 실패! 검이 깨졌습니다!',
+              '이런! 강화에 실패했습니다!',
+              '실패! 다시 처음부터 시작해야 합니다!'
+            ];
+            failureMessage = messages[Math.floor(Math.random() * messages.length)];
+          }
+
+          // 강화 실패 시 진동 추가 (external file 없이)
+          if (navigator.vibrate) {
+            // 높은 레벨일수록 진동이 더 강해짐
+            if (currentLevel >= 7) {
+              // 매우 강한 진동 패턴 (대실패)
+              navigator.vibrate([100, 50, 200, 50, 300, 50, 200, 50, 100]);
+            } else if (currentLevel >= 4) {
+              // 강한 진동 패턴 
+              navigator.vibrate([100, 50, 150, 50, 200]);
+            } else {
+              // 일반 진동
+              navigator.vibrate(300);
+            }
+          }
+
           // 실패한 경우의 새 상태 반환 (컬렉션은 그대로 유지)
           return {
             ...prevState,
@@ -263,7 +305,7 @@ const calculateSellPrice = useCallback((swordPower, swordLevel = 0) => {
             enhancementCost: Math.floor(100 * Math.pow(1.5, newSwordLevel)),
             successRate: Math.max(5, 90 - (newSwordLevel * 7)),
             enhancing: false,
-            resultMessage: '강화 실패!',
+            resultMessage: failureMessage,  // 여기가 변경되는 부분
             lastEnhanceSuccess: false
           };
         }
