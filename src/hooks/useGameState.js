@@ -50,10 +50,17 @@ const useGameState = () => {
   const showFusionModal = useCallback(() => setFusionModalVisible(true), []);
   const hideFusionModal = useCallback(() => setFusionModalVisible(false), []);
 
-  // 판매 가격 계산 함수
-  const calculateSellPrice = useCallback((swordPower) => {
-    return Math.floor(swordPower * 10);
-  }, []);
+  // 판매 가격 계산 함수 - 비약적으로 증가하는 버전
+const calculateSellPrice = useCallback((swordPower, swordLevel = 0) => {
+  // 기본 가격 (공격력 * 20)으로 상향
+  const basePrice = swordPower * 20;
+  
+  // 레벨이 높을수록 기하급수적으로 판매 가격 증가 (3^레벨 * 300)
+  // 기존: 2^레벨 * 100 => 변경: 3^레벨 * 300
+  const levelBonus = Math.pow(3, swordLevel) * 300;
+  
+  return Math.floor(basePrice + levelBonus);
+}, []);
 
   // 게임 상태 로드 시 적용 함수
   const applyGameState = useCallback((savedState) => {
