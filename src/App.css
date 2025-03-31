@@ -1,3 +1,5 @@
+/* App.css - 검 강화 게임 전체 스타일 */
+
 * {
   margin: 0;
   padding: 0;
@@ -265,6 +267,7 @@ body {
   z-index: 10;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .collection-content {
@@ -273,8 +276,41 @@ body {
   border-radius: 15px;
   width: 90%;
   max-width: 600px;
-  max-height: 80vh;
+  max-height: calc(80vh - 60px);
   overflow-y: auto;
+}
+
+/* 컬렉션 진행 상태 표시 바 */
+.collection-progress {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #333342;
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.5s ease;
+}
+
+/* 세트 검 진행바 색상 다르게 */
+.set-progress-fill {
+  background-color: #ffd700;
+}
+
+/* 컬렉션 완성률 표시 */
+.collection-percent {
+  font-size: 16px;
+  color: #ffd700;
+  font-weight: normal;
 }
 
 .collection-grid {
@@ -284,6 +320,7 @@ body {
   margin: 20px 0;
 }
 
+/* 수집 여부에 따른 스타일 */
 .collection-item {
   background-color: #333342;
   border-radius: 10px;
@@ -300,11 +337,28 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+.collection-item.uncollected {
+  opacity: 0.7;
+  background-color: #2a2a3c;
+  border: 1px dashed #444;
+}
+
+.collection-item.collected {
+  border: 1px solid #4caf50;
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.2);
+}
+
 .collection-sword-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
   margin-bottom: 10px;
+}
+
+/* 미획득 검 이미지 흑백 처리 */
+.collection-sword-image.grayscale {
+  filter: grayscale(100%);
+  opacity: 0.6;
 }
 
 .collection-sword-info {
@@ -327,10 +381,51 @@ body {
   margin-bottom: 3px;
 }
 
+/* 검 상태 텍스트 */
+.collection-sword-status {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 3px;
+}
+
 .no-collection {
   text-align: center;
   color: #cccccc;
   padding: 30px 20px;
+  font-style: italic;
+}
+
+/* 컬렉션 섹션 분리 */
+.collection-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #444;
+}
+
+.collection-section h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #cccccc;
+}
+
+/* 컬렉션 작업 버튼 영역 */
+.collection-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  width: 90%;
+  max-width: 600px;
+}
+
+/* 워터마크 스타일 */
+.collection-watermark {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px dashed #444;
+  color: #666;
+  font-size: 12px;
   font-style: italic;
 }
 
@@ -343,14 +438,112 @@ body {
   font-size: 16px;
   font-weight: bold;
   border-radius: 8px;
-  margin-top: 15px;
   cursor: pointer;
-  width: 100%;
   transition: background-color 0.3s;
+  flex: 1;
 }
 
 .close-button:hover {
   background-color: #7b68ee;
+}
+
+/* 캡처 버튼 */
+.capture-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.3s;
+}
+
+.capture-button:hover {
+  background-color: #3d9140;
+  transform: translateY(-2px);
+}
+
+.capture-button:active {
+  transform: translateY(1px);
+}
+
+/* 캡처 관련 알림 */
+.capture-notice, 
+.capture-success {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(42, 42, 60, 0.9);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+.capture-notice {
+  animation: pulse 1.5s infinite;
+}
+
+.capture-success {
+  background-color: rgba(76, 175, 80, 0.9);
+  animation: fadeIn 0.3s;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* 세트 검 스타일 */
+.set-items-section h3 {
+  color: #ffd700;
+}
+
+.set-collection-item {
+  position: relative;
+  border: 1px solid #ffd700 !important;
+  background: linear-gradient(145deg, #2a2a3c, #333342) !important;
+}
+
+.set-collection-item.collected {
+  box-shadow: 0 3px 15px rgba(255, 215, 0, 0.3) !important;
+  opacity: 1 !important;
+}
+
+.set-collection-item .set-item-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #ffd700;
+  color: #2a2a3c;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.collection-sword-name.set-sword-name {
+  color: #ffd700;
+}
+
+.collection-sword-special {
+  font-size: 12px;
+  color: #ff9800;
+  margin-bottom: 3px;
 }
 
 /* 강화 효과 애니메이션 */
@@ -391,7 +584,6 @@ body {
 .enhancing {
   animation: enhance-glow 1s ease-in-out;
 }
-
 
 @keyframes sword-shake {
   0% { transform: translateX(0) scale(1); filter: brightness(1); }
@@ -446,41 +638,6 @@ body {
   pointer-events: none;
   z-index: 5;
   animation: failure-flash 0.8s ease-in-out;
-}
-
-
-/* 반응형 스타일 */
-@media (max-width: 480px) {
-  .sword-display {
-      padding: 20px 10px;
-  }
-  
-  #sword-image {
-      width: 150px;
-      height: 150px;
-  }
-  
-  .sword-name {
-      font-size: 18px;
-  }
-  
-  .sword-level, .sword-power {
-      font-size: 14px;
-  }
-  
-  .enhance-button {
-      padding: 12px;
-      font-size: 16px;
-  }
-  
-  .collection-grid {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-  
-  .collection-sword-image {
-      width: 80px;
-      height: 80px;
-  }
 }
 
 /* 세트 합성 모달 스타일 */
@@ -697,30 +854,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 세트 아이템 특별 스타일 (컬렉션에서 사용) */
-.collection-item.set-item {
-  border: 2px solid #ffd700;
-  background: linear-gradient(145deg, #333342, #3d3d52);
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
-}
-
-.collection-sword-name.set-sword-name {
-  color: #ffd700;
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-}
-
-.set-item-badge {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: #ffd700;
-  color: #333342;
-  font-size: 10px;
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
 /* 합성 성공 애니메이션 */
 @keyframes fusion-success {
   0% {
@@ -739,4 +872,205 @@ body {
 
 .fusion-success {
   animation: fusion-success 1s ease-in-out;
+}
+
+/* 게임 초기화 버튼 */
+.reset-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.reset-button:hover {
+  opacity: 1;
+}
+
+/* 스크린 플래시 효과 */
+.screen-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(244, 67, 54, 0.2);
+  z-index: 10;
+  pointer-events: none;
+  animation: screen-flash 0.5s ease-out;
+}
+
+@keyframes screen-flash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* 반응형 스타일 */
+@media (max-width: 480px) {
+  .sword-display {
+      padding: 20px 10px;
+  }
+  
+  #sword-image {
+      width: 150px;
+      height: 150px;
+  }
+  
+  .sword-name {
+      font-size: 18px;
+  }
+  
+  .sword-level, .sword-power {
+      font-size: 14px;
+  }
+  
+  .enhance-button {
+      padding: 12px;
+      font-size: 16px;
+  }
+  
+  .collection-grid {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .collection-sword-image {
+      width: 80px;
+      height: 80px;
+  }
+  
+  .required-sword-item {
+      width: 100%;
+  }
+}
+
+/* 캡처 중 스타일 */
+.collection-content.capturing {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 캡처 버튼 비활성화 스타일 */
+.capture-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 캡처 시 이미지 로딩 관련 수정 */
+.collection-sword-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 10px;
+  image-rendering: -webkit-optimize-contrast; /* 이미지 렌더링 최적화 */
+}
+
+/* App.css에 추가할 스냅샷 및 미리보기 관련 스타일 */
+
+/* 캡처 미리보기 영역 */
+.capture-preview {
+  background-color: #2a2a3c;
+  padding: 20px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.capture-preview h2 {
+  text-align: center;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.preview-container {
+  overflow-y: auto;
+  max-height: calc(80vh - 150px);
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 5px;
+  background-color: #252536;
+}
+
+.preview-image {
+  width: 100%;
+  display: block;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.download-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.3s;
+}
+
+.download-button:hover {
+  background-color: #3d9140;
+  transform: translateY(-2px);
+}
+
+.download-button:active {
+  transform: translateY(1px);
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.cancel-button:active {
+  transform: translateY(1px);
+}
+
+/* 스냅샷 영역 스타일 */
+.snapshot-area {
+  opacity: 0;
+  pointer-events: none;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* 스냅샷에서 사용되는 이미지 최적화 */
+.snapshot-area img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }

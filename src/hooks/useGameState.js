@@ -13,7 +13,16 @@ const DEFAULT_GAME_STATE = {
   swordImage: 'images/sword_0.png',
   enhancementCost: 100,
   successRate: 90,
-  collectedSwords: [],
+  collectedSwords: [
+    // 레벨 0 검을 기본적으로 컬렉션에 추가
+    {
+      level: 0,
+      name: '낡은 글라디우스',
+      power: 10,
+      imageSrc: 'images/sword_0.png',
+      obtainedDate: new Date().toLocaleDateString()
+    }
+  ],
   resultMessage: null,
   lastEnhanceSuccess: false,
   enhancing: false
